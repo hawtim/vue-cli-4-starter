@@ -1,6 +1,6 @@
 module.exports = {
-  preset: '@vue/cli-plugin-unit-jest',
+  preset: "@vue/cli-plugin-unit-jest",
   moduleNameMapper: {
-    '\\.(css|less)$': 'identity-obj-proxy'
+    "\\.(css|less)$": "identity-obj-proxy"
   }
-}
+};

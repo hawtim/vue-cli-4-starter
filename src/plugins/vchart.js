@@ -1,4 +1,4 @@
-import Vue from 'vue'
-import VePie from 'v-charts/lib/pie.common'
+import Vue from "vue";
+import VePie from "v-charts/lib/pie.common";
 
-Vue.component(VePie.name, VePie)
+Vue.component(VePie.name, VePie);

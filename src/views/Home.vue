@@ -197,13 +197,15 @@
 </template>
 
 <script>
+import Vue from "vue";
+import Confirm from "@/components/Confirm";
 // @ is an alias to /src
-import dayjs from 'dayjs'
-import { formatDate } from '@/utils'
-import AddBillDialog from '@/components/AddBillDialog'
+import dayjs from "dayjs";
+import { formatDate } from "@/utils";
+import AddBillDialog from "@/components/AddBillDialog";
 
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
     AddBillDialog
   },
@@ -212,8 +214,8 @@ export default {
       originBill: [],
       // 二级筛选条件
       filterForm: {
-        month: '',
-        category: ''
+        month: "",
+        category: ""
       },
       // 添加账单
       dialogFormVisible: false,
@@ -229,218 +231,234 @@ export default {
       output: 0,
       // 图表数据
       outputChartData: {
-        columns: ['分类', '消费金额']
+        columns: ["分类", "消费金额"]
       },
       incomeChartData: {
-        columns: ['分类', '消费金额']
+        columns: ["分类", "消费金额"]
       }
-    }
+    };
   },
   computed: {
-    ...mapGetters(['bill', 'category', 'categoryMap', 'splitBillList'])
+    ...mapGetters(["bill", "category", "categoryMap", "splitBillList"])
   },
   created() {
     if (window.innerWidth <= 414) {
-      this.isMobile = true
+      this.isMobile = true;
     } else {
-      this.isMobile = false
+      this.isMobile = false;
     }
-    this.$store.commit('transformCategory')
+    this.$store.commit("transformCategory");
     // 不修改源数据
-    this.processBillList()
+    this.processBillList();
+  },
+  mounted() {
+    this.checkSomething();
   },
   watch: {
-    'filterForm.month'(val) {
+    "filterForm.month"(val) {
       if (!val) {
-        this.filterSplitBillList = null
+        this.filterSplitBillList = null;
         if (this.filterForm.category) {
-          const category = this.filterForm.category
-          this.calculateCurrentCategory(category)
+          const category = this.filterForm.category;
+          this.calculateCurrentCategory(category);
         }
-        return
+        return;
       }
-      const month = formatDate(val, 'YYYY-MM')
-      this.calculateCurrentMonth(month)
+      const month = formatDate(val, "YYYY-MM");
+      this.calculateCurrentMonth(month);
     },
-    'filterForm.category'(val) {
+    "filterForm.category"(val) {
       if (!val) {
-        this.filterSplitBillList = null
+        this.filterSplitBillList = null;
         if (this.filterForm.month) {
-          const month = formatDate(this.filterForm.month, 'YYYY-MM')
-          this.calculateCurrentMonth(month)
+          const month = formatDate(this.filterForm.month, "YYYY-MM");
+          this.calculateCurrentMonth(month);
         }
-        return
+        return;
       }
-      const category = val
-      this.calculateCurrentCategory(category)
+      const category = val;
+      this.calculateCurrentCategory(category);
     }
   },
   methods: {
+    checkSomething() {
+      function confirm(data = {}) {
+        const { show } = data;
+        const dialogCtor = Vue.extend(Confirm);
+        const instance = new dialogCtor({
+          el: document.createElement("div"),
+          propsData: {
+            show
+          }
+        });
+        document.body.appendChild(instance.$el);
+      }
+    },
     processBillList() {
-      this.originBill = Object.assign([], this.bill)
-      const temp = this.formatBillList(this.bill)
-      this.$store.commit('handleSplitBillList', temp)
+      this.originBill = Object.assign([], this.bill);
+      const temp = this.formatBillList(this.bill);
+      this.$store.commit("handleSplitBillList", temp);
     },
     handleSplitBillList(billList) {
-      const obj = {}
+      const obj = {};
       billList.forEach(item => {
-        const yearAndMonth = item.time.slice(0, 7)
+        const yearAndMonth = item.time.slice(0, 7);
         if (!obj[yearAndMonth]) {
-          obj[yearAndMonth] = []
-          obj[yearAndMonth].push(item)
+          obj[yearAndMonth] = [];
+          obj[yearAndMonth].push(item);
         } else {
-          obj[yearAndMonth].push(item)
+          obj[yearAndMonth].push(item);
         }
-      })
-      return obj
+      });
+      return obj;
     },
     calculateCurrentMonth(month) {
       if (!this.filterForm.category) {
-        this.currentBillList = this.splitBillList[month]
-        this.calculateCurrentTotal()
-        this.calculateChartData()
+        this.currentBillList = this.splitBillList[month];
+        this.calculateCurrentTotal();
+        this.calculateChartData();
       } else {
-        const temp = this.splitBillList[month] || []
+        const temp = this.splitBillList[month] || [];
         this.currentBillList = temp.filter(
           item => item.category == this.categoryMap[this.filterForm.category]
-        )
-        this.calculateCurrentTotal()
+        );
+        this.calculateCurrentTotal();
       }
     },
     // 计算图片相关数据
     calculateChartData() {
-      if (!this.currentBillList || !this.currentBillList.length) return
-      this.incomeTotal()
-      this.outputTotal()
+      if (!this.currentBillList || !this.currentBillList.length) return;
+      this.incomeTotal();
+      this.outputTotal();
     },
     incomeTotal() {
-      const temp = {}
+      const temp = {};
       this.currentBillList.forEach(item => {
         if (item.type == 1) {
-          const absAmount = Math.abs(item.amount)
+          const absAmount = Math.abs(item.amount);
           if (temp[item.category]) {
-            temp[item.category] += Number(absAmount)
+            temp[item.category] += Number(absAmount);
           } else {
-            temp[item.category] = 0
-            temp[item.category] += Number(absAmount)
+            temp[item.category] = 0;
+            temp[item.category] += Number(absAmount);
           }
         }
-      })
+      });
       this.incomeChartData = Object.assign({}, this.incomeChartData, {
         rows: Object.keys(temp)
           .map(key => {
             return {
               分类: key,
               消费金额: temp[key]
-            }
+            };
           })
           .sort((cur, next) => {
-            return cur['消费金额'] - next['消费金额']
+            return cur["消费金额"] - next["消费金额"];
           })
-      })
+      });
     },
     outputTotal() {
-      const temp = {}
+      const temp = {};
       this.currentBillList.forEach(item => {
         if (item.type == 0) {
-          const absAmount = Math.abs(item.amount)
+          const absAmount = Math.abs(item.amount);
           if (temp[item.category]) {
-            temp[item.category] += Number(absAmount)
+            temp[item.category] += Number(absAmount);
           } else {
-            temp[item.category] = 0
-            temp[item.category] += Number(absAmount)
+            temp[item.category] = 0;
+            temp[item.category] += Number(absAmount);
           }
         }
-      })
+      });
       this.outputChartData = Object.assign({}, this.outputChartData, {
         rows: Object.keys(temp)
           .map(key => {
             return {
               分类: key,
               消费金额: temp[key]
-            }
+            };
           })
           .sort((cur, next) => {
-            return cur['消费金额'] - next['消费金额']
+            return cur["消费金额"] - next["消费金额"];
           })
-      })
+      });
     },
     // 计算当前列表的里的总收入和总支出
     calculateCurrentTotal() {
-      this.income = 0
-      this.output = 0
-      if (!this.currentBillList) return
+      this.income = 0;
+      this.output = 0;
+      if (!this.currentBillList) return;
       this.currentBillList.forEach(item => {
-        const absAmount = Math.abs(item.amount)
+        const absAmount = Math.abs(item.amount);
         if (item.type == 1) {
-          this.income += Number(absAmount)
+          this.income += Number(absAmount);
         } else {
-          this.output += Number(absAmount)
+          this.output += Number(absAmount);
         }
-      })
+      });
     },
     // 筛选出当前分类下的列表
     calculateCurrentCategory(category) {
       if (!this.filterForm.month) {
         // 筛选全部里的某一个分类
-        const temp = {}
+        const temp = {};
         Object.keys(this.splitBillList).forEach(key => {
           const filtered = this.splitBillList[key].filter(
             item => item.category == this.categoryMap[category]
-          )
-          temp[key] = filtered
-        })
-        this.filterSplitBillList = temp
+          );
+          temp[key] = filtered;
+        });
+        this.filterSplitBillList = temp;
       } else {
         // 筛选某个月份下的某个分类
-        const month = formatDate(this.filterForm.month, 'YYYY-MM')
-        const temp = this.splitBillList[month] || []
+        const month = formatDate(this.filterForm.month, "YYYY-MM");
+        const temp = this.splitBillList[month] || [];
         this.currentBillList = temp.filter(
           item => item.category == this.categoryMap[category]
-        )
-        this.calculateCurrentTotal()
+        );
+        this.calculateCurrentTotal();
       }
     },
     loadMoreBill() {
-      console.log('TODO 加载更多账单')
+      console.log("TODO 加载更多账单");
     },
     sortBillList(billList) {
-      return billList.sort((current, next) => next.time - current.time)
+      return billList.sort((current, next) => next.time - current.time);
     },
     formatBillList(billList) {
       // 默认时间倒序
-      const temp = this.sortBillList(billList)
+      const temp = this.sortBillList(billList);
       return temp.map(item => {
-        item.time = formatDate(item.time)
-        item.category = this.categoryMap[item.category] || item.category
-        const absAmount = Math.abs(item.amount)
-        item.amount = !item.type ? '-' + absAmount : absAmount
-        return item
-      })
+        item.time = formatDate(item.time);
+        item.category = this.categoryMap[item.category] || item.category;
+        const absAmount = Math.abs(item.amount);
+        item.amount = !item.type ? "-" + absAmount : absAmount;
+        return item;
+      });
     },
     formatMonth(string) {
-      return formatDate(string, 'YYYY年MM月')
+      return formatDate(string, "YYYY年MM月");
     },
     onAdd() {
-      this.dialogFormVisible = true
+      this.dialogFormVisible = true;
     },
     handleDialogHide() {
-      this.dialogFormVisible = false
+      this.dialogFormVisible = false;
     },
     handleDialogUpdate(data) {
-      console.log(data)
-      this.filterForm.month = ''
-      this.filterForm.category = ''
+      console.log(data);
+      this.filterForm.month = "";
+      this.filterForm.category = "";
       // 新增数据更新
-      this.$store.commit('addBill', data)
+      this.$store.commit("addBill", data);
       this.$message({
-        message: '添加成功',
-        type: 'success'
+        message: "添加成功",
+        type: "success"
       });
-      this.processBillList()
+      this.processBillList();
     }
   }
-}
+};
 </script>
 <style scoped lang="scss">
 .home {

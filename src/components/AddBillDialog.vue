@@ -46,7 +46,7 @@
   </el-dialog>
 </template>
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex";
 export default {
   props: {
     show: {
@@ -58,29 +58,29 @@ export default {
   data() {
     return {
       billForm: null,
-      formLabelWidth: '60px',
+      formLabelWidth: "60px",
       categorySelect: []
-    }
+    };
   },
   computed: {
-    ...mapGetters(['category'])
+    ...mapGetters(["category"])
   },
   created() {
-    this.resetDialog()
-    this.categorySelect = this.category
+    this.resetDialog();
+    this.categorySelect = this.category;
   },
   methods: {
     handleSelectCategory(val) {
-      const index = this.categorySelect.findIndex(item => item.id == val)
-      this.billForm.type = this.categorySelect[index].type
+      const index = this.categorySelect.findIndex(item => item.id == val);
+      this.billForm.type = this.categorySelect[index].type;
     },
     processAmount(data) {
-      data.amount = Number(data.amount).toFixed(2)
-      return data
+      data.amount = Number(data.amount).toFixed(2);
+      return data;
     },
     handleCancel() {
-      this.hideDialog()
-      this.resetDialog()
+      this.hideDialog();
+      this.resetDialog();
     },
     resetDialog() {
       this.billForm = {
@@ -88,21 +88,21 @@ export default {
         amount: 0,
         category: this.category[0].id,
         type: this.category[0].type
-      }
+      };
     },
     hideDialog() {
-      this.$emit('hide')
+      this.$emit("hide");
     },
     handleConfirm() {
-      const temp = this.processAmount(this.billForm)
-      this.$emit('update', temp)
-      this.handleCancel()
+      const temp = this.processAmount(this.billForm);
+      this.$emit("update", temp);
+      this.handleCancel();
     },
     handleClose() {
-      this.hideDialog()
+      this.hideDialog();
     }
   }
-}
+};
 </script>
 <style lang="scss">
 .add-bill-dialog {

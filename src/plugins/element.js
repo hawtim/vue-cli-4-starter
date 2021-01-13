@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from "vue";
 import {
   Button,
   DatePicker,
@@ -12,13 +12,13 @@ import {
   Backtop,
   Tag,
   Message
-} from 'element-ui'
+} from "element-ui";
 
 if (window.innerWidth <= 414) {
-  Vue.prototype.$ELEMENT = { size: 'small', zIndex: 3000 }
+  Vue.prototype.$ELEMENT = { size: "small", zIndex: 3000 };
 }
 
-Vue.prototype.$message = Message
+Vue.prototype.$message = Message;
 
 Vue.use(Button)
   .use(DatePicker)
@@ -30,4 +30,4 @@ Vue.use(Button)
   .use(Option)
   .use(InfiniteScroll)
   .use(Backtop)
-  .use(Tag)
+  .use(Tag);
